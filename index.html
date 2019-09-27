@@ -1,10 +1,75 @@
+<div id = 'gameDiv' style='display:none;'>
 <canvas id="ctx" width="760" height="484" style="border:1px solid #000000;"></canvas>
+</div>
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<body vlink = 'blue'>
+
+<div id = 'signDiv' style='display:inline-block;'>
+	<p id = 'heading'><b><u>Club Penguin United Armies | Login</u></b></p>
+	Username: <input id = 'signDiv-username' type = 'text'></input><br><br>
+	Password: <input id = 'signDiv-password' type = 'password'></input><br>
+	<input type = 'button' value = 'Sign In' id = 'signDiv-signIn'></input><br>
+	<a id = 'signDiv-signUp' href='javascript:;'>Don't have an account yet? Click here to create one.</a>
+</div>
+
 <script>
+	// Sign In
+	
+	var sign_status = false;
+
+	var signDiv = document.getElementById('signDiv');
+	var signDivUsername = document.getElementById('signDiv-username');
+	var signDivPassword = document.getElementById('signDiv-password');
+	var signDivSignIn = document.getElementById('signDiv-signIn');
+	var signDivSignUp = document.getElementById('signDiv-signUp');
+	var heading = document.getElementById('heading');
+
+	signDivSignIn.onclick = function() {
+		if(signDivSignIn.value === 'Sign In') {
+			socket.emit('signIn', {username: signDivUsername.value, pass: signDivPassword.value});
+		} else {
+			socket.emit('signUp', {username: signDivUsername.value, pass: signDivPassword.value});
+		}
+	}
+
+	signDivSignUp.onclick = function() {
+		if(signDivSignIn.value === 'Sign In') {
+			signDivSignIn.value = 'Sign Up';
+			heading.innerHTML = '<b><u>Club Penguin United Armies | Register</u></b>';
+			signDivSignUp.innerHTML = 'Already have an account? Click here to login.'
+		}
+		else {
+			signDivSignIn.value = 'Sign In';
+			heading.innerHTML = '<b><u>Club Penguin United Armies | Login</u></b>';
+			signDivSignUp.innerHTML = "Don't have an account yet? Click here to create one.";
+		}
+	}
+	
+	// Game
     var ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = '30px Arial';
    
     var socket = io();
+	
+	socket.on('signInResponse', function(data) {
+		if(data.success == true) {
+			signDiv.style.display = 'none';
+			gameDiv.style.display = 'inline-block';
+		}
+		else {
+			alert('Sign in unsuccessful.');
+		}
+	});
+
+	socket.on('signUpResponse', function(data) {
+		if(data.success == true) {
+			alert('Sign up successful.');
+		}
+		else {
+			alert('Sign up unsuccessful.');
+		}
+	});
+	
 	var images = preload_images();
 	var map_open = false;
        
@@ -127,3 +192,4 @@
 	}
 	
 </script>
+</body>

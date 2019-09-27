@@ -12,6 +12,24 @@ console.log("Server started.");
  
 var SOCKET_LIST = {};
  
+var USERS = {
+	//username:password
+	"pyxelpranav":"pyxelpranav",
+	"drharvey":"drharvey"
+};
+
+var isValidPassword = function(data) {
+	return USERS[data.username] === data.pass;
+}
+
+var isUsernameTaken = function(data) {
+	return USERS[data.username];
+}
+
+var addUser = function(data) {
+	USERS[data.username] = data.pass;
+}
+ 
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', function(socket){
     socket.id = Math.random();
@@ -32,7 +50,7 @@ io.sockets.on('connection', function(socket){
 	
 	socket.sit = false;
 	
-    SOCKET_LIST[socket.id] = socket;
+    // SOCKET_LIST[socket.id] = socket;
 	
 	socket.on('keydown', function(data) {
 		switch(data) {
@@ -103,6 +121,24 @@ io.sockets.on('connection', function(socket){
     socket.on('disconnect',function(){
         delete SOCKET_LIST[socket.id];
     });
+	
+	socket.on('signIn', function(data) {
+			if(isValidPassword(data)) {
+				socket.emit('signInResponse', {success: true});
+				SOCKET_LIST[socket.id] = socket;
+			} else {
+				socket.emit('signInResponse', {success: false});
+			}
+		});
+		
+	socket.on('signUp', function(data) {
+		if(isUsernameTaken(data)) {
+			socket.emit('signUpResponse', {success: false});
+		} else {
+			addUser(data);
+			socket.emit('signUpResponse', {success: true});
+		}
+	});
    
 });
 
